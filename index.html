@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Painel Completo de FIIs - Gestão de Carteira</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0; 
+  padding: 20px; 
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+h1 { 
+  text-align: center; 
+  color: #fff;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  font-size: 32px;
+}
+
+.subtitle {
+  text-align: center;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
+/* Cards de Resumo */
+.cards-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card .valor {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1e88e5;
+}
+
+.card .valor.success {
+  color: #4caf50;
+}
+
+.card .sub-valor {
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
+}
+
+/* Controles */
+.controles {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+button { 
+  padding: 12px 20px; 
+  background: #1e88e5; 
+  color: #fff; 
+  border: none; 
+  border-radius: 8px; 
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button:hover { 
+  background: #1565c0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+button.btn-success { background: #4caf50; }
+button.btn-success:hover { background: #388e3c; }
+
+button.btn-danger { background: #f44336; }
+button.btn-danger:hover { background: #d32f2f; }
+
+button.btn-secondary { background: #757575; }
+button.btn-secondary:hover { background: #616161; }
+
+button.btn-warning { background: #ff9800; }
+button.btn-warning:hover { background: #f57c00; }
+
+/* Filtros */
+.filtros {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filtros input, .filtros select {
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.filtros input:focus, .filtros select:focus {
+  outline: none;
+  border-color: #1e88e5;
+}
+
+/* Tabela */
+.table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  overflow-x: auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 25px;
+}
+
+table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  min-width: 1200px;
+}
+
+th, td { 
+  padding: 12px; 
+  border-bottom: 1px solid #e0e0e0; 
+  text-align: center;
+  font-size: 13px;
+}
+
+th { 
+  background: #1e88e5; 
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+th:hover {
+  background: #1565c0;
+}
+
+th.sortable::after {
+  content: ' ⇅';
+  opacity: 0.5;
+}
+
+tbody tr:hover {
+  background: #f5f5f5;
+}
+
+.positivo { color: #4caf50; font-weight: bold; }
+.negativo { color: #f44336; font-weight: bold; }
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.badge-high { background: #4caf50; color: white; }
+.badge-medium { background: #ff9800; color: white; }
+.badge-low { background: #f44336; color: white; }
+
+/* Gráficos */
+.graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.grafico-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.grafico-card h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  animation: fadeIn 0.3s;
+  overflow-y: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: #fff;
+  margin: 30px auto;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 600px;
+  animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.close {
+  font-size: 32px;
+  font-weight: bold;
+  color: #999;
+  cursor: pointer;
+  line-height: 20px;
+}
+
+.close:hover { color: #333; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #666;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: #1e88e5;
+}
+
+.form-group .helper {
+  font-size: 11px;
+  color: #999;
+  margin-top: 3px;
+}
+
+/* Loading */
+.loading {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading.show {
+  display: flex;
+}
+
+.spinner-container {
+  text-align: center;
+  color: #fff;
+}
+
+.spinner {
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #333;
+  color: #fff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: none;
+  animation: slideIn 0.3s;
+  z-index: 3000;
+  max-width: 400px;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(400px); }
+  to { transform: translateX(0); }
+}
+
+.toast.success { background: #4caf50; }
+.toast.error { background: #f44336; }
+.toast.warning { background: #ff9800; }
+.toast.info { background: #2196f3; }
+
+/* Ações */
+.acoes {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.btn-small {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .graficos {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  table {
+    font-size: 11px;
+  }
+  
+  th, td {
+    padding: 8px 4px;
+  }
+}
+
+.highlight {
+  background: #fff9c4 !important;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>📊 Painel Completo de Fundos Imobiliários</h1>
+  <p class="subtitle">Gestão Inteligente de Carteira com Cálculos Automáticos</p>
+  
+  <div class="loading" id="loading">
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      <div>Processando...</div>
+    </div>
+  </div>
+
+  <!-- Cards de Resumo -->
+  <div class="cards-resumo">
+    <div class="card">
+      <h3>📈 Total de FIIs</h3>
+      <div class="valor" id="totalFiis">0</div>
+    </div>
+    <div class="card">
+      <h3>💰 Total Investido</h3>
+      <div class="valor success" id="totalInvestido">R$ 0,00</div>
+    </div>
+    <div class="card">
+      <h3>💵 Proventos/Mês</h3>
+      <div class="valor success" id="proventosMes">R$ 0,00</div>
+      <div class="sub-valor" id="proventosAno">R$ 0,00/ano</div>
+    </div>
+    <div class="card">
+      <h3>📊 DY Médio</h3>
+      <div class="valor" id="dyMedio">0%</div>
+    </div>
+    <div class="card">
+      <h3>📈 Rendimento Mensal</h3>
+      <div class="valor" id="rendMensal">0%</div>
+    </div>
+    <div class="card">
+      <h3>📅 Rendimento Anual</h3>
+      <div class="valor" id="rendAnual">0%</div>
+    </div>
+  </div>
+
+  <!-- Controles -->
+  <div class="controles">
+    <div class="btn-group">
+      <button onclick="abrirModalAdicionar()" class="btn-success">
+        ➕ Adicionar FII
+      </button>
+      <button onclick="carregar()">
+        🔄 Atualizar Dados
+      </button>
+      <button onclick="sincronizar()" class="btn-warning">
+        🔁 Sincronizar Cálculos
+      </button>
+      <button onclick="exportarCSV()" class="btn-secondary">
+        📥 Exportar CSV
+      </button>
+      <button onclick="exportarJSON()" class="btn-secondary">
+        📄 Exportar JSON
+      </button>
+    </div>
+    
+    <div class="filtros">
+      <input type="text" id="filtroTicker" placeholder="🔍 Buscar por ticker..." onkeyup="filtrarTabela()">
+      <select id="filtroOrdem" onchange="ordenarTabela()">
+        <option value="">Ordenar por...</option>
+        <option value="ticker">Ticker (A-Z)</option>
+        <option value="dy-desc">DY (Maior)</option>
+        <option value="investido-desc">Investimento (Maior)</option>
+        <option value="proventos-desc">Proventos (Maior)</option>
+      </select>
+      <select id="filtroDY" onchange="filtrarTabela()">
+        <option value="">Todos os DY</option>
+        <option value="high">DY > 10%</option>
+        <option value="medium">DY 6-10%</option>
+        <option value="low">DY < 6%</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="table-wrapper">
+    <table id="tabela">
+      <thead>
+        <tr>
+          <th class="sortable">Ticker</th>
+          <th class="sortable">Preço</th>
+          <th class="sortable">DY (%)</th>
+          <th class="sortable">P/VP</th>
+          <th class="sortable">Qtd. Cotas</th>
+          <th class="sortable">Provento/Cota</th>
+          <th class="sortable">Total Investido</th>
+          <th class="sortable">Total Proventos</th>
+          <th class="sortable">Rend. Mensal</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="graficos">
+    <div class="grafico-card">
+      <h3>📊 Dividend Yield por FII</h3>
+      <canvas id="graficoDY"></canvas>
+    </div>
+    <div class="grafico-card">
+      <h3>💰 Distribuição do Investimento</h3>
+      <canvas id="graficoInvestimento"></canvas>
+    </div>
+  </div>
+
+  <div class="graficos">
+    <div class="grafico-card">
+      <h3>💵 Proventos Mensais por FII</h3>
+      <canvas id="graficoProventos"></canvas>
+    </div>
+    <div class="grafico-card">
+      <h3>📈 Rendimento Mensal (%)</h3>
+      <canvas id="graficoRendimento"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Adicionar FII -->
+<div id="modalAdicionar" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>➕ Adicionar Novo FII</h2>
+      <span class="close" onclick="fecharModal('modalAdicionar')">&times;</span>
+    </div>
+    <form id="formAdicionar" onsubmit="adicionarFII(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ticker *</label>
+          <input type="text" id="novoTicker" required placeholder="Ex: HGLG11" style="text-transform: uppercase;">
+        </div>
+        <div class="form-group">
+          <label>Preço Atual (R$) *</label>
+          <input type="number" id="novoPreco" step="0.01" required placeholder="150.00">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Dividend Yield (%) *</label>
+          <input type="number" id="novoDY" step="0.01" required placeholder="8.50">
+        </div>
+        <div class="form-group">
+          <label>P/VP</label>
+          <input type="number" id="novoPVP" step="0.01" placeholder="0.95">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantidade de Cotas *</label>
+          <input type="number" id="novaQtdCotas" step="1" required placeholder="100">
+          <div class="helper">Quantas cotas você possui</div>
+        </div>
+        <div class="form-group">
+          <label>Provento por Cota (R$) *</label>
+          <input type="number" id="novoProventoCota" step="0.01" required placeholder="1.17">
+          <div class="helper">Último provento distribuído</div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Dividendos 12m (R$)</label>
+          <input type="number" id="novoDiv12m" step="0.01" placeholder="12.75">
+        </div>
+        <div class="form-group">
+          <label>Valorização (%)</label>
+          <input type="number" id="novaVal" step="0.01" placeholder="5.23">
+        </div>
+      </div>
+      
+      <button type="submit" class="btn-success" style="width: 100%; margin-top: 10px;">
+        ✅ Adicionar FII
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar FII -->
+<div id="modalEditar" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>✏️ Editar FII</h2>
+      <span class="close" onclick="fecharModal('modalEditar')">&times;</span>
+    </div>
+    <form id="formEditar" onsubmit="salvarEdicao(event)">
+      <input type="hidden" id="editIndex">
+      <div class="form-group">
+        <label>Ticker</label>
+        <input type="text" id="editTicker" readonly style="background: #f0f0f0;">
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Preço Atual (R$)</label>
+          <input type="number" id="editPreco" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>DY (%)</label>
+          <input type="number" id="editDY" step="0.01" required>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>P/VP</label>
+          <input type="number" id="editPVP" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Valorização (%)</label>
+          <input type="number" id="editVal" step="0.01">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantidade de Cotas</label>
+          <input type="number" id="editQtdCotas" step="1" required>
+        </div>
+        <div class="form-group">
+          <label>Provento por Cota (R$)</label>
+          <input type="number" id="editProventoCota" step="0.01" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Dividendos 12m (R$)</label>
+        <input type="number" id="editDiv12m" step="0.01">
+      </div>
+      
+      <button type="submit" class="btn-success" style="width: 100%; margin-top: 10px;">
+        💾 Salvar Alterações
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ========== CONFIGURAÇÃO ==========
+const API = "https://script.google.com/macros/s/AKfycby1RrlTH6qCRnM_q3gzZvS8cQ2gCC7NU2WwZAbQWay5jXZzuObekdHSUztRi6ZmBWwE7Q/exec";
+
+// Dados globais
+let dadosOriginais = [];
+let dadosFiltrados = [];
+let graficoDY, graficoInv, graficoProv, graficoRend;
+
+// ========== CARREGAR DADOS ==========
+function carregar() {
+  mostrarLoading(true);
+  
+  fetch(API)
+    .then(r => r.json())
+    .then(dados => {
+      dadosOriginais = dados;
+      dadosFiltrados = dados;
+      renderizarTabela(dados);
+      atualizarCards();
+      renderizarGraficos(dados);
+      mostrarToast('Dados atualizados com sucesso!', 'success');
+    })
+    .catch(erro => {
+      console.error('Erro:', erro);
+      mostrarToast('Erro ao carregar dados', 'error');
+    })
+    .finally(() => {
+      mostrarLoading(false);
+    });
+}
+
+// ========== SINCRONIZAR ==========
+function sincronizar() {
+  mostrarLoading(true);
+  
+  fetch(API + '?action=sync')
+    .then(r => r.json())
+    .then(resultado => {
+      mostrarToast(resultado.message, resultado.success ? 'success' : 'error');
+      if (resultado.success) {
+        carregar();
+      }
+    })
+    .catch(erro => {
+      console.error('Erro:', erro);
+      mostrarToast('Erro ao sincronizar', 'error');
+    })
+    .finally(() => {
+      mostrarLoading(false);
+    });
+}
+
+// ========== RENDERIZAR TABELA ==========
+function renderizarTabela(dados) {
+  const tbody = document.querySelector("#tabela tbody");
+  tbody.innerHTML = "";
+
+  dados.forEach((f, index) => {
+    const dyClass = f.dy > 10 ? 'badge-high' : f.dy > 6 ? 'badge-medium' : 'badge-low';
+    const rendMensal = f.totalInvestido > 0 ? (f.totalProventos / f.totalInvestido * 100) : 0;
+    
+    tbody.innerHTML += `
+    <tr>
+      <td><strong>${f.ticker}</strong></td>
+      <td>R$ ${f.preco.toFixed(2)}</td>
+      <td><span class="badge ${dyClass}">${f.dy.toFixed(2)}%</span></td>
+      <td>${f.pvp ? f.pvp.toFixed(2) : '-'}</td>
+      <td>${f.quantidadeCotas.toFixed(0)}</td>
+      <td>R$ ${f.proventoPorCota.toFixed(2)}</td>
+      <td><strong>R$ ${f.totalInvestido.toFixed(2)}</strong></td>
+      <td class="success"><strong>R$ ${f.totalProventos.toFixed(2)}</strong></td>
+      <td>${rendMensal.toFixed(2)}%</td>
+      <td class="acoes">
+        <button class="btn-small" onclick="abrirModalEditar(${index})" title="Editar">✏️</button>
+        <button class="btn-small btn-danger" onclick="confirmarExclusao('${f.ticker}', ${index})" title="Excluir">🗑️</button>
+      </td>
+    </tr>`;
+  });
+}
+
+// ========== ATUALIZAR CARDS ==========
+function atualizarCards() {
+  mostrarLoading(true);
+  
+  fetch(API + '?action=stats')
+    .then(r => r.json())
+    .then(stats => {
+      document.getElementById('totalFiis').textContent = stats.totalFiis;
+      document.getElementById('totalInvestido').textContent = 'R$ ' + stats.totalInvestido.toFixed(2);
+      document.getElementById('proventosMes').textContent = 'R$ ' + stats.totalProventosMensal.toFixed(2);
+      document.getElementById('proventosAno').textContent = 'R$ ' + stats.totalProventosAnual.toFixed(2) + '/ano';
+      document.getElementById('dyMedio').textContent = stats.dyMedio.toFixed(2) + '%';
+      document.getElementById('rendMensal').textContent = stats.percentualRendimentoMensal.toFixed(2) + '%';
+      document.getElementById('rendAnual').textContent = stats.percentualRendimentoAnual.toFixed(2) + '%';
+    })
+    .catch(erro => {
+      console.error('Erro ao carregar estatísticas:', erro);
+    })
+    .finally(() => {
+      mostrarLoading(false);
+    });
+}
+
+// ========== RENDERIZAR GRÁFICOS ==========
+function renderizarGraficos(dados) {
+  const labels = dados.map(f => f.ticker);
+  const dyData = dados.map(f => f.dy);
+  const investData = dados.map(f => f.totalInvestido);
+  const provData = dados.map(f => f.totalProventos);
+  const rendData = dados.map(f => f.totalInvestido > 0 ? (f.totalProventos / f.totalInvestido * 100) : 0);
+  
+  // Gráfico DY
+  const ctxDY = document.getElementById("graficoDY");
+  if (graficoDY) graficoDY.destroy();
+  
+  graficoDY = new Chart(ctxDY, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'DY (%)',
+        data: dyData,
+        backgroundColor: dyData.map(dy => dy > 10 ? '#4caf50' : dy > 6 ? '#ff9800' : '#f44336')
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+  
+  // Gráfico Investimento
+  const ctxInv = document.getElementById("graficoInvestimento");
+  if (graficoInv) graficoInv.destroy();
+  
+  graficoInv = new Chart(ctxInv, {
+    type: 'pie',
+    data: {
+      labels,
+      datasets: [{
+        data: investData,
+        backgroundColor: [
+          '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+          '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'right' },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              return context.label + ': R$ ' + context.parsed.toFixed(2);
+            }
+          }
+        }
+      }
+    }
+  });
+  
+  // Gráfico Proventos
+  const ctxProv = document.getElementById("graficoProventos");
+  if (graficoProv) graficoProv.destroy();
+  
+  graficoProv = new Chart(ctxProv, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Proventos Mensais (R$)',
+        data: provData,
+        backgroundColor: '#4caf50'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+  
+  // Gráfico Rendimento
+  const ctxRend = document.getElementById("graficoRendimento");
+  if (graficoRend) graficoRend.destroy();
+  
+  graficoRend = new Chart(ctxRend, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Rendimento Mensal (%)',
+        data: rendData,
+        backgroundColor: '#2196f3'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+// ========== ADICIONAR FII ==========
+function adicionarFII(event) {
+  event.preventDefault();
+  
+  const novoFII = {
+    ticker: document.getElementById('novoTicker').value.toUpperCase(),
+    preco: parseFloat(document.getElementById('novoPreco').value),
+    dy: parseFloat(document.getElementById('novoDY').value),
+    div12m: parseFloat(document.getElementById('novoDiv12m').value) || 0,
+    valorizacao: parseFloat(document.getElementById('novaVal').value) || 0,
+    pvp: parseFloat(document.getElementById('novoPVP').value) || null,
+    quantidadeCotas: parseFloat(document.getElementById('novaQtdCotas').value),
+    proventoPorCota: parseFloat(document.getElementById('novoProventoCota').value)
+  };
+  
+  mostrarLoading(true);
+  
+  fetch(API, {
+    method: 'POST',
+    body: JSON.stringify(novoFII)
+  })
+  .then(r => r.json())
+  .then(resultado => {
+    if (resultado.success) {
+      mostrarToast('FII adicionado! Investido: R$ ' + resultado.data.totalInvestido.toFixed(2), 'success');
+      fecharModal('modalAdicionar');
+      document.getElementById('formAdicionar').reset();
+      carregar();
+    } else {
+      mostrarToast(resultado.message, 'error');
+    }
+  })
+  .catch(erro => {
+    console.error('Erro:', erro);
+    mostrarToast('Erro ao adicionar FII', 'error');
+  })
+  .finally(() => {
+    mostrarLoading(false);
+  });
+}
+
+// ========== EDITAR FII ==========
+function abrirModalEditar(index) {
+  const fii = dadosFiltrados[index];
+  
+  document.getElementById('editIndex').value = index;
+  document.getElementById('editTicker').value = fii.ticker;
+  document.getElementById('editPreco').value = fii.preco;
+  document.getElementById('editDY').value = fii.dy;
+  document.getElementById('editDiv12m').value = fii.div12m || '';
+  document.getElementById('editVal').value = fii.valorizacao || '';
+  document.getElementById('editPVP').value = fii.pvp || '';
+  document.getElementById('editQtdCotas').value = fii.quantidadeCotas;
+  document.getElementById('editProventoCota').value = fii.proventoPorCota;
+  
+  document.getElementById('modalEditar').style.display = 'block';
+}
+
+function salvarEdicao(event) {
+  event.preventDefault();
+  
+  const ticker = document.getElementById('editTicker').value;
+  
+  const fiiAtualizado = {
+    ticker: ticker,
+    preco: parseFloat(document.getElementById('editPreco').value),
+    dy: parseFloat(document.getElementById('editDY').value),
+    div12m: parseFloat(document.getElementById('editDiv12m').value) || 0,
+    valorizacao: parseFloat(document.getElementById('editVal').value) || 0,
+    pvp: parseFloat(document.getElementById('editPVP').value) || null,
+    quantidadeCotas: parseFloat(document.getElementById('editQtdCotas').value),
+    proventoPorCota: parseFloat(document.getElementById('editProventoCota').value)
+  };
+  
+  mostrarLoading(true);
+  
+  fetch(API + '?action=update&ticker=' + ticker, {
+    method: 'POST',
+    body: JSON.stringify(fiiAtualizado)
+  })
+  .then(r => r.json())
+  .then(resultado => {
+    if (resultado.success) {
+      mostrarToast('FII atualizado com sucesso!', 'success');
+      fecharModal('modalEditar');
+      carregar();
+    } else {
+      mostrarToast(resultado.message, 'error');
+    }
+  })
+  .catch(erro => {
+    console.error('Erro:', erro);
+    mostrarToast('Erro ao atualizar FII', 'error');
+  })
+  .finally(() => {
+    mostrarLoading(false);
+  });
+}
+
+// ========== EXCLUIR FII ==========
+function confirmarExclusao(ticker, index) {
+  if (confirm(`Tem certeza que deseja excluir o FII ${ticker}?`)) {
+    excluirFII(ticker);
+  }
+}
+
+function excluirFII(ticker) {
+  mostrarLoading(true);
+  
+  fetch(API + '?action=delete&ticker=' + ticker, {
+    method: 'POST'
+  })
+  .then(r => r.json())
+  .then(resultado => {
+    if (resultado.success) {
+      mostrarToast('FII excluído com sucesso!', 'success');
+      carregar();
+    } else {
+      mostrarToast(resultado.message, 'error');
+    }
+  })
+  .catch(erro => {
+    console.error('Erro:', erro);
+    mostrarToast('Erro ao excluir FII', 'error');
+  })
+  .finally(() => {
+    mostrarLoading(false);
+  });
+}
+
+// ========== FILTRAR E ORDENAR ==========
+function filtrarTabela() {
+  const filtroTicker = document.getElementById('filtroTicker').value.toUpperCase();
+  const filtroDY = document.getElementById('filtroDY').value;
+  
+  dadosFiltrados = dadosOriginais.filter(fii => {
+    const matchTicker = fii.ticker.toUpperCase().includes(filtroTicker);
+    
+    let matchDY = true;
+    if (filtroDY === 'high') matchDY = fii.dy > 10;
+    else if (filtroDY === 'medium') matchDY = fii.dy >= 6 && fii.dy <= 10;
+    else if (filtroDY === 'low') matchDY = fii.dy < 6;
+    
+    return matchTicker && matchDY;
+  });
+  
+  renderizarTabela(dadosFiltrados);
+}
+
+function ordenarTabela() {
+  const ordem = document.getElementById('filtroOrdem').value;
+  if (!ordem) return;
+  
+  const [campo, direcao] = ordem.split('-');
+  
+  const mapa = {
+    'ticker': 'ticker',
+    'dy': 'dy',
+    'investido': 'totalInvestido',
+    'proventos': 'totalProventos'
+  };
+  
+  const campoReal = mapa[campo];
+  
+  dadosFiltrados.sort((a, b) => {
+    let valA = a[campoReal];
+    let valB = b[campoReal];
+    
+    if (campo === 'ticker') {
+      return direcao === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
+    }
+    
+    return direcao === 'desc' ? valB - valA : valA - valB;
+  });
+  
+  renderizarTabela(dadosFiltrados);
+}
+
+// ========== EXPORTAR ==========
+function exportarCSV() {
+  let csv = 'Ticker,Preço,DY,P/VP,Qtd Cotas,Provento/Cota,Total Investido,Total Proventos\n';
+  
+  dadosFiltrados.forEach(f => {
+    csv += `${f.ticker},${f.preco},${f.dy},${f.pvp||''},${f.quantidadeCotas},${f.proventoPorCota},${f.totalInvestido},${f.totalProventos}\n`;
+  });
+  
+  baixarArquivo(csv, 'fiis-carteira.csv', 'text/csv');
+  mostrarToast('CSV exportado!', 'success');
+}
+
+function exportarJSON() {
+  const json = JSON.stringify(dadosFiltrados, null, 2);
+  baixarArquivo(json, 'fiis-carteira.json', 'application/json');
+  mostrarToast('JSON exportado!', 'success');
+}
+
+function baixarArquivo(conteudo, nomeArquivo, tipo) {
+  const blob = new Blob([conteudo], { type: tipo });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomeArquivo;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ========== MODAIS ==========
+function abrirModalAdicionar() {
+  document.getElementById('modalAdicionar').style.display = 'block';
+}
+
+function fecharModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+window.onclick = function(event) {
+  if (event.target.classList.contains('modal')) {
+    event.target.style.display = 'none';
+  }
+}
+
+// ========== UTILITÁRIOS ==========
+function mostrarLoading(mostrar) {
+  const loading = document.getElementById('loading');
+  if (mostrar) {
+    loading.classList.add('show');
+  } else {
+    loading.classList.remove('show');
+  }
+}
+
+function mostrarToast(mensagem, tipo = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = mensagem;
+  toast.className = `toast ${tipo}`;
+  toast.style.display = 'block';
+  
+  setTimeout(() => {
+    toast.style.display = 'none';
+  }, 4000);
+}
+
+// ========== INICIALIZAR ==========
+carregar();
+</script>
+
+</body>
+</html>
