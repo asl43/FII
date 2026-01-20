@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Painel Completo de FIIs - Gestão de Carteira</title>
+<title>Painel Completo de FIIs - com IA e Projeções</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -128,6 +128,72 @@ button.btn-secondary:hover { background: #616161; }
 button.btn-warning { background: #ff9800; }
 button.btn-warning:hover { background: #f57c00; }
 
+button.btn-info { background: #2196f3; }
+button.btn-info:hover { background: #1976d2; }
+
+button.btn-purple { background: #9c27b0; }
+button.btn-purple:hover { background: #7b1fa2; }
+
+/* Upload Area */
+.upload-area {
+  background: #f8f9fa;
+  border: 3px dashed #1e88e5;
+  border-radius: 12px;
+  padding: 30px;
+  text-align: center;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.upload-area:hover {
+  background: #e3f2fd;
+  border-color: #1565c0;
+}
+
+.upload-area.dragging {
+  background: #bbdefb;
+  border-color: #0d47a1;
+}
+
+.upload-area input[type="file"] {
+  display: none;
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: #1e88e5;
+  margin-bottom: 10px;
+}
+
+.upload-text {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #999;
+}
+
+.text-paste-area {
+  width: 100%;
+  min-height: 150px;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  resize: vertical;
+  margin-top: 10px;
+}
+
+.text-paste-area:focus {
+  outline: none;
+  border-color: #1e88e5;
+}
+
 /* Filtros */
 .filtros {
   display: flex;
@@ -184,11 +250,6 @@ th {
 
 th:hover {
   background: #1565c0;
-}
-
-th.sortable::after {
-  content: ' ⇅';
-  opacity: 0.5;
 }
 
 tbody tr:hover {
@@ -254,7 +315,7 @@ tbody tr:hover {
   margin: 30px auto;
   padding: 30px;
   border-radius: 12px;
-  max-width: 600px;
+  max-width: 900px;
   animation: slideDown 0.3s;
 }
 
@@ -324,6 +385,49 @@ tbody tr:hover {
   margin-top: 3px;
 }
 
+/* Painel de Projeções */
+.projecao-controles {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.projecao-resultado {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.projecao-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.projecao-item {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #1e88e5;
+}
+
+.projecao-item h4 {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.projecao-item .valor-projetado {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1e88e5;
+}
+
 /* Loading */
 .loading {
   display: none;
@@ -388,7 +492,6 @@ tbody tr:hover {
 .toast.warning { background: #ff9800; }
 .toast.info { background: #2196f3; }
 
-/* Ações */
 .acoes {
   display: flex;
   gap: 5px;
@@ -398,6 +501,43 @@ tbody tr:hover {
 .btn-small {
   padding: 6px 10px;
   font-size: 12px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab {
+  padding: 12px 24px;
+  background: transparent;
+  color: #666;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  color: #1e88e5;
+  border-bottom-color: #1e88e5;
+  font-weight: bold;
+}
+
+.tab:hover {
+  background: #f5f5f5;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
 }
 
 /* Responsividade */
@@ -410,17 +550,10 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
   
-  table {
-    font-size: 11px;
+  .projecao-controles {
+    flex-direction: column;
+    align-items: stretch;
   }
-  
-  th, td {
-    padding: 8px 4px;
-  }
-}
-
-.highlight {
-  background: #fff9c4 !important;
 }
 </style>
 </head>
@@ -428,8 +561,8 @@ tbody tr:hover {
 <body>
 
 <div class="container">
-  <h1>📊 Painel Completo de Fundos Imobiliários</h1>
-  <p class="subtitle">Gestão Inteligente de Carteira com Cálculos Automáticos</p>
+  <h1>📊 Painel Completo de FIIs com IA</h1>
+  <p class="subtitle">Gestão Inteligente • Extração Automática • Projeções Futuras</p>
   
   <div class="loading" id="loading">
     <div class="spinner-container">
@@ -438,176 +571,276 @@ tbody tr:hover {
     </div>
   </div>
 
-  <!-- Cards de Resumo -->
-  <div class="cards-resumo">
-    <div class="card">
-      <h3>📈 Total de FIIs</h3>
-      <div class="valor" id="totalFiis">0</div>
-    </div>
-    <div class="card">
-      <h3>💰 Total Investido</h3>
-      <div class="valor success" id="totalInvestido">R$ 0,00</div>
-    </div>
-    <div class="card">
-      <h3>💵 Proventos/Mês</h3>
-      <div class="valor success" id="proventosMes">R$ 0,00</div>
-      <div class="sub-valor" id="proventosAno">R$ 0,00/ano</div>
-    </div>
-    <div class="card">
-      <h3>📊 DY Médio</h3>
-      <div class="valor" id="dyMedio">0%</div>
-    </div>
-    <div class="card">
-      <h3>📈 Rendimento Mensal</h3>
-      <div class="valor" id="rendMensal">0%</div>
-    </div>
-    <div class="card">
-      <h3>📅 Rendimento Anual</h3>
-      <div class="valor" id="rendAnual">0%</div>
-    </div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="mudarTab('carteira')">📊 Minha Carteira</button>
+    <button class="tab" onclick="mudarTab('adicionar')">➕ Adicionar FII</button>
+    <button class="tab" onclick="mudarTab('projecoes')">📈 Projeções</button>
   </div>
 
-  <!-- Controles -->
-  <div class="controles">
-    <div class="btn-group">
-      <button onclick="abrirModalAdicionar()" class="btn-success">
-        ➕ Adicionar FII
-      </button>
-      <button onclick="carregar()">
-        🔄 Atualizar Dados
-      </button>
-      <button onclick="sincronizar()" class="btn-warning">
-        🔁 Sincronizar Cálculos
-      </button>
-      <button onclick="exportarCSV()" class="btn-secondary">
-        📥 Exportar CSV
-      </button>
-      <button onclick="exportarJSON()" class="btn-secondary">
-        📄 Exportar JSON
-      </button>
+  <!-- TAB: CARTEIRA -->
+  <div id="tab-carteira" class="tab-content active">
+    <!-- Cards de Resumo -->
+    <div class="cards-resumo">
+      <div class="card">
+        <h3>📈 Total de FIIs</h3>
+        <div class="valor" id="totalFiis">0</div>
+      </div>
+      <div class="card">
+        <h3>💰 Total Investido</h3>
+        <div class="valor success" id="totalInvestido">R$ 0,00</div>
+      </div>
+      <div class="card">
+        <h3>💵 Proventos/Mês</h3>
+        <div class="valor success" id="proventosMes">R$ 0,00</div>
+        <div class="sub-valor" id="proventosAno">R$ 0,00/ano</div>
+      </div>
+      <div class="card">
+        <h3>📊 DY Médio</h3>
+        <div class="valor" id="dyMedio">0%</div>
+      </div>
+      <div class="card">
+        <h3>📈 Rendimento Mensal</h3>
+        <div class="valor" id="rendMensal">0%</div>
+      </div>
+      <div class="card">
+        <h3>📅 Rendimento Anual</h3>
+        <div class="valor" id="rendAnual">0%</div>
+      </div>
     </div>
-    
-    <div class="filtros">
-      <input type="text" id="filtroTicker" placeholder="🔍 Buscar por ticker..." onkeyup="filtrarTabela()">
-      <select id="filtroOrdem" onchange="ordenarTabela()">
-        <option value="">Ordenar por...</option>
-        <option value="ticker">Ticker (A-Z)</option>
-        <option value="dy-desc">DY (Maior)</option>
-        <option value="investido-desc">Investimento (Maior)</option>
-        <option value="proventos-desc">Proventos (Maior)</option>
-      </select>
-      <select id="filtroDY" onchange="filtrarTabela()">
-        <option value="">Todos os DY</option>
-        <option value="high">DY > 10%</option>
-        <option value="medium">DY 6-10%</option>
-        <option value="low">DY < 6%</option>
-      </select>
-    </div>
-  </div>
 
-  <!-- Tabela -->
-  <div class="table-wrapper">
-    <table id="tabela">
-      <thead>
-        <tr>
-          <th class="sortable">Ticker</th>
-          <th class="sortable">Preço</th>
-          <th class="sortable">DY (%)</th>
-          <th class="sortable">P/VP</th>
-          <th class="sortable">Qtd. Cotas</th>
-          <th class="sortable">Provento/Cota</th>
-          <th class="sortable">Total Investido</th>
-          <th class="sortable">Total Proventos</th>
-          <th class="sortable">Rend. Mensal</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <!-- Gráficos -->
-  <div class="graficos">
-    <div class="grafico-card">
-      <h3>📊 Dividend Yield por FII</h3>
-      <canvas id="graficoDY"></canvas>
-    </div>
-    <div class="grafico-card">
-      <h3>💰 Distribuição do Investimento</h3>
-      <canvas id="graficoInvestimento"></canvas>
-    </div>
-  </div>
-
-  <div class="graficos">
-    <div class="grafico-card">
-      <h3>💵 Proventos Mensais por FII</h3>
-      <canvas id="graficoProventos"></canvas>
-    </div>
-    <div class="grafico-card">
-      <h3>📈 Rendimento Mensal (%)</h3>
-      <canvas id="graficoRendimento"></canvas>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Adicionar FII -->
-<div id="modalAdicionar" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>➕ Adicionar Novo FII</h2>
-      <span class="close" onclick="fecharModal('modalAdicionar')">&times;</span>
-    </div>
-    <form id="formAdicionar" onsubmit="adicionarFII(event)">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Ticker *</label>
-          <input type="text" id="novoTicker" required placeholder="Ex: HGLG11" style="text-transform: uppercase;">
-        </div>
-        <div class="form-group">
-          <label>Preço Atual (R$) *</label>
-          <input type="number" id="novoPreco" step="0.01" required placeholder="150.00">
-        </div>
+    <!-- Controles -->
+    <div class="controles">
+      <div class="btn-group">
+        <button onclick="carregar()">
+          🔄 Atualizar Dados
+        </button>
+        <button onclick="sincronizar()" class="btn-warning">
+          🔁 Sincronizar Cálculos
+        </button>
+        <button onclick="exportarCSV()" class="btn-secondary">
+          📥 Exportar CSV
+        </button>
+        <button onclick="exportarJSON()" class="btn-secondary">
+          📄 Exportar JSON
+        </button>
       </div>
       
-      <div class="form-row">
-        <div class="form-group">
-          <label>Dividend Yield (%) *</label>
-          <input type="number" id="novoDY" step="0.01" required placeholder="8.50">
-        </div>
-        <div class="form-group">
-          <label>P/VP</label>
-          <input type="number" id="novoPVP" step="0.01" placeholder="0.95">
-        </div>
+      <div class="filtros">
+        <input type="text" id="filtroTicker" placeholder="🔍 Buscar por ticker..." onkeyup="filtrarTabela()">
+        <select id="filtroOrdem" onchange="ordenarTabela()">
+          <option value="">Ordenar por...</option>
+          <option value="ticker">Ticker (A-Z)</option>
+          <option value="dy-desc">DY (Maior)</option>
+          <option value="investido-desc">Investimento (Maior)</option>
+          <option value="proventos-desc">Proventos (Maior)</option>
+        </select>
+        <select id="filtroDY" onchange="filtrarTabela()">
+          <option value="">Todos os DY</option>
+          <option value="high">DY > 10%</option>
+          <option value="medium">DY 6-10%</option>
+          <option value="low">DY < 6%</option>
+        </select>
       </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Quantidade de Cotas *</label>
-          <input type="number" id="novaQtdCotas" step="1" required placeholder="100">
-          <div class="helper">Quantas cotas você possui</div>
-        </div>
-        <div class="form-group">
-          <label>Provento por Cota (R$) *</label>
-          <input type="number" id="novoProventoCota" step="0.01" required placeholder="1.17">
-          <div class="helper">Último provento distribuído</div>
-        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-wrapper">
+      <table id="tabela">
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Preço</th>
+            <th>DY (%)</th>
+            <th>P/VP</th>
+            <th>Qtd. Cotas</th>
+            <th>Provento/Cota</th>
+            <th>Total Investido</th>
+            <th>Total Proventos</th>
+            <th>Rend. Mensal</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="graficos">
+      <div class="grafico-card">
+        <h3>📊 Dividend Yield por FII</h3>
+        <canvas id="graficoDY"></canvas>
       </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Dividendos 12m (R$)</label>
-          <input type="number" id="novoDiv12m" step="0.01" placeholder="12.75">
-        </div>
-        <div class="form-group">
-          <label>Valorização (%)</label>
-          <input type="number" id="novaVal" step="0.01" placeholder="5.23">
-        </div>
+      <div class="grafico-card">
+        <h3>💰 Distribuição do Investimento</h3>
+        <canvas id="graficoInvestimento"></canvas>
       </div>
+    </div>
+
+    <div class="graficos">
+      <div class="grafico-card">
+        <h3>💵 Proventos Mensais por FII</h3>
+        <canvas id="graficoProventos"></canvas>
+      </div>
+      <div class="grafico-card">
+        <h3>📈 Rendimento Mensal (%)</h3>
+        <canvas id="graficoRendimento"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ADICIONAR FII -->
+  <div id="tab-adicionar" class="tab-content">
+    <div class="controles">
+      <h2 style="margin-top: 0;">🤖 Extração Automática de Dados</h2>
       
-      <button type="submit" class="btn-success" style="width: 100%; margin-top: 10px;">
-        ✅ Adicionar FII
+      <!-- Upload de PDF -->
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('pdfInput').click()">
+        <input type="file" id="pdfInput" accept=".pdf,image/*" onchange="processarArquivo(this.files[0])">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Arraste um PDF ou imagem aqui</div>
+        <div class="upload-hint">ou clique para selecionar</div>
+      </div>
+
+      <!-- Cola de Texto -->
+      <h3>📋 Ou Cole/Digite os Dados do FII:</h3>
+      <textarea id="textoPasteArea" class="text-paste-area" placeholder="Cole aqui os dados do FII (exemplo: dados do Fundamentus, Status Invest, etc.)"></textarea>
+      <button onclick="extrairDadosTexto()" class="btn-info" style="margin-top: 10px;">
+        🔍 Extrair Dados do Texto
       </button>
-    </form>
+
+      <hr style="margin: 30px 0; border: none; border-top: 2px solid #e0e0e0;">
+
+      <!-- Formulário Manual -->
+      <h3>✍️ Ou Preencha Manualmente:</h3>
+      <form id="formAdicionar" onsubmit="adicionarFII(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ticker *</label>
+            <input type="text" id="novoTicker" required placeholder="Ex: HGLG11" style="text-transform: uppercase;">
+          </div>
+          <div class="form-group">
+            <label>Preço Atual (R$) *</label>
+            <input type="number" id="novoPreco" step="0.01" required placeholder="150.00">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dividend Yield (%) *</label>
+            <input type="number" id="novoDY" step="0.01" required placeholder="8.50">
+          </div>
+          <div class="form-group">
+            <label>P/VP</label>
+            <input type="number" id="novoPVP" step="0.01" placeholder="0.95">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Quantidade de Cotas *</label>
+            <input type="number" id="novaQtdCotas" step="1" required placeholder="100">
+            <div class="helper">Quantas cotas você possui</div>
+          </div>
+          <div class="form-group">
+            <label>Provento por Cota (R$) *</label>
+            <input type="number" id="novoProventoCota" step="0.01" required placeholder="1.17">
+            <div class="helper">Último provento distribuído</div>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dividendos 12m (R$)</label>
+            <input type="number" id="novoDiv12m" step="0.01" placeholder="12.75">
+          </div>
+          <div class="form-group">
+            <label>Valorização (%)</label>
+            <input type="number" id="novaVal" step="0.01" placeholder="5.23">
+          </div>
+        </div>
+        
+        <button type="submit" class="btn-success" style="width: 100%; margin-top: 10px;">
+          ✅ Adicionar FII à Carteira
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB: PROJEÇÕES -->
+  <div id="tab-projecoes" class="tab-content">
+    <div class="controles">
+      <h2 style="margin-top: 0;">📈 Simulador de Projeções Futuras</h2>
+      
+      <div class="projecao-controles">
+        <div class="form-group" style="margin: 0;">
+          <label>Selecione o FII</label>
+          <select id="fiiProjecao" style="min-width: 200px;">
+            <option value="">-- Selecione --</option>
+            <option value="todos">📊 Todos os FIIs (Carteira)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label>Período de Projeção</label>
+          <select id="periodoProjecao" onchange="ajustarPeriodoCustom()">
+            <option value="">-- Selecione --</option>
+            <optgroup label="Curto Prazo (Meses)">
+              <option value="1m">1 mês</option>
+              <option value="3m">3 meses</option>
+              <option value="6m">6 meses</option>
+              <option value="12m">12 meses</option>
+            </optgroup>
+            <optgroup label="Médio/Longo Prazo (Anos)">
+              <option value="1y">1 ano</option>
+              <option value="2y">2 anos</option>
+              <option value="3y">3 anos</option>
+              <option value="5y">5 anos</option>
+              <option value="10y">10 anos</option>
+              <option value="15y">15 anos</option>
+              <option value="20y">20 anos</option>
+              <option value="25y">25 anos</option>
+              <option value="30y">30 anos</option>
+            </optgroup>
+            <option value="custom">⚙️ Personalizado</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="periodoCustomDiv" style="margin: 0; display: none;">
+          <label>Meses Personalizados</label>
+          <input type="number" id="mesesCustom" min="1" max="360" placeholder="1-360">
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label>Cenário de Crescimento</label>
+          <select id="cenarioProjecao">
+            <option value="conservador">🛡️ Conservador (-10% DY)</option>
+            <option value="realista" selected>📊 Realista (DY atual)</option>
+            <option value="otimista">📈 Otimista (+10% DY)</option>
+            <option value="custom">⚙️ Personalizado</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="dyCustomDiv" style="margin: 0; display: none;">
+          <label>DY Anual (%)</label>
+          <input type="number" id="dyCustom" step="0.1" placeholder="8.5">
+        </div>
+
+        <button onclick="calcularProjecoes()" class="btn-success" style="align-self: end;">
+          🚀 Calcular Projeções
+        </button>
+      </div>
+
+      <div id="resultadoProjecao" class="projecao-resultado" style="display: none;">
+        <!-- Resultado aqui -->
+      </div>
+    </div>
+
+    <!-- Gráfico de Projeção -->
+    <div class="grafico-card" id="graficoProjecaoCard" style="display: none; margin-top: 20px;">
+      <h3>📊 Evolução Projetada do Patrimônio</h3>
+      <canvas id="graficoProjecao"></canvas>
+    </div>
   </div>
 </div>
 
@@ -675,12 +908,28 @@ tbody tr:hover {
 
 <script>
 // ========== CONFIGURAÇÃO ==========
-const API = "https://script.google.com/macros/s/AKfycby1RrlTH6qCRnM_q3gzZvS8cQ2gCC7NU2WwZAbQWay5jXZzuObekdHSUztRi6ZmBWwE7Q/exec";
+const API = "https://script.google.com/macros/s/AKfycbyKorQUbCf1GF8DejMpsvmpVv1HCAeZGdx0J9jIQFv62CXZVYlMixXhNWaFew_aqWnSKQ/exec";
 
 // Dados globais
 let dadosOriginais = [];
 let dadosFiltrados = [];
-let graficoDY, graficoInv, graficoProv, graficoRend;
+let graficoDY, graficoInv, graficoProv, graficoRend, graficoProj;
+
+// ========== NAVEGAÇÃO ENTRE TABS ==========
+function mudarTab(tabName) {
+  // Remover active de todos
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  
+  // Ativar tab selecionada
+  document.querySelector(`[onclick="mudarTab('${tabName}')"]`).classList.add('active');
+  document.getElementById(`tab-${tabName}`).classList.add('active');
+  
+  // Carregar dados do select de projeções
+  if (tabName === 'projecoes') {
+    carregarFIIsProjecao();
+  }
+}
 
 // ========== CARREGAR DADOS ==========
 function carregar() {
@@ -877,6 +1126,85 @@ function renderizarGraficos(dados) {
   });
 }
 
+// ========== EXTRAÇÃO DE DADOS ==========
+
+// Processar arquivo PDF/imagem
+function processarArquivo(file) {
+  if (!file) return;
+  
+  mostrarLoading(true);
+  mostrarToast('Processando arquivo...', 'info');
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const conteudo = e.target.result;
+    
+    // Se for imagem, usar OCR (simplificado - em produção usar API)
+    if (file.type.startsWith('image/')) {
+      mostrarToast('Processamento de imagem não implementado nesta versão. Use colar texto.', 'warning');
+      mostrarLoading(false);
+      return;
+    }
+    
+    // Se for PDF, extrair texto (simplificado)
+    if (file.type === 'application/pdf') {
+      mostrarToast('Processamento de PDF não implementado nesta versão. Use colar texto.', 'warning');
+      mostrarLoading(false);
+      return;
+    }
+  };
+  
+  reader.readAsDataURL(file);
+}
+
+// Extrair dados do texto colado
+function extrairDadosTexto() {
+  const texto = document.getElementById('textoPasteArea').value;
+  
+  if (!texto.trim()) {
+    mostrarToast('Cole algum texto primeiro!', 'warning');
+    return;
+  }
+  
+  mostrarLoading(true);
+  
+  try {
+    // Expressões regulares para extrair informações
+    const dados = {
+      ticker: extrairValor(texto, /([A-Z]{4}\d{2}[A-Z]?)/),
+      preco: extrairValor(texto, /(?:Valor atual|Preço|Cotação).*?R\$\s*([\d.,]+)/i),
+      dy: extrairValor(texto, /(?:Dividend Yield|DY).*?([\d.,]+)\s*%/i),
+      pvp: extrairValor(texto, /(?:P\/VP|PVP).*?([\d.,]+)/i),
+      div12m: extrairValor(texto, /(?:Últimos 12 meses|12m).*?R\$\s*([\d.,]+)/i),
+      valorizacao: extrairValor(texto, /(?:Valorização|Val\.).*?([-+]?[\d.,]+)\s*%/i),
+      patrimonio: extrairValor(texto, /(?:Patrimônio|Valor patrim).*?R\$\s*([\d.,]+)/i),
+      rendimento: extrairValor(texto, /(?:Último rendimento|Rendimento).*?R\$\s*([\d.,]+)/i)
+    };
+    
+    // Preencher formulário
+    if (dados.ticker) document.getElementById('novoTicker').value = dados.ticker;
+    if (dados.preco) document.getElementById('novoPreco').value = parseFloat(dados.preco.replace(',', '.'));
+    if (dados.dy) document.getElementById('novoDY').value = parseFloat(dados.dy.replace(',', '.'));
+    if (dados.pvp) document.getElementById('novoPVP').value = parseFloat(dados.pvp.replace(',', '.'));
+    if (dados.div12m) document.getElementById('novoDiv12m').value = parseFloat(dados.div12m.replace(',', '.'));
+    if (dados.valorizacao) document.getElementById('novaVal').value = parseFloat(dados.valorizacao.replace(',', '.'));
+    if (dados.rendimento) document.getElementById('novoProventoCota').value = parseFloat(dados.rendimento.replace(',', '.'));
+    
+    mostrarToast(`Dados extraídos! Ticker: ${dados.ticker || 'N/A'}`, 'success');
+    
+  } catch (erro) {
+    console.error('Erro ao extrair:', erro);
+    mostrarToast('Erro ao extrair dados. Verifique o formato.', 'error');
+  } finally {
+    mostrarLoading(false);
+  }
+}
+
+function extrairValor(texto, regex) {
+  const match = texto.match(regex);
+  return match ? match[1].trim() : null;
+}
+
 // ========== ADICIONAR FII ==========
 function adicionarFII(event) {
   event.preventDefault();
@@ -902,9 +1230,10 @@ function adicionarFII(event) {
   .then(resultado => {
     if (resultado.success) {
       mostrarToast('FII adicionado! Investido: R$ ' + resultado.data.totalInvestido.toFixed(2), 'success');
-      fecharModal('modalAdicionar');
       document.getElementById('formAdicionar').reset();
+      document.getElementById('textoPasteArea').value = '';
       carregar();
+      mudarTab('carteira');
     } else {
       mostrarToast(resultado.message, 'error');
     }
@@ -1055,6 +1384,195 @@ function ordenarTabela() {
   renderizarTabela(dadosFiltrados);
 }
 
+// ========== PROJEÇÕES ==========
+function carregarFIIsProjecao() {
+  const select = document.getElementById('fiiProjecao');
+  
+  // Limpar opções antigas
+  select.innerHTML = '<option value="">-- Selecione --</option><option value="todos">📊 Todos os FIIs (Carteira)</option>';
+  
+  // Adicionar FIIs
+  dadosOriginais.forEach(fii => {
+    const option = document.createElement('option');
+    option.value = fii.ticker;
+    option.textContent = `${fii.ticker} - R$ ${fii.preco.toFixed(2)} (DY ${fii.dy.toFixed(2)}%)`;
+    select.appendChild(option);
+  });
+}
+
+function ajustarPeriodoCustom() {
+  const periodo = document.getElementById('periodoProjecao').value;
+  const customDiv = document.getElementById('periodoCustomDiv');
+  
+  if (periodo === 'custom') {
+    customDiv.style.display = 'block';
+  } else {
+    customDiv.style.display = 'none';
+  }
+}
+
+function calcularProjecoes() {
+  const fiiSelecionado = document.getElementById('fiiProjecao').value;
+  const periodo = document.getElementById('periodoProjecao').value;
+  const cenario = document.getElementById('cenarioProjecao').value;
+  
+  if (!fiiSelecionado || !periodo) {
+    mostrarToast('Selecione o FII e o período!', 'warning');
+    return;
+  }
+  
+  mostrarLoading(true);
+  
+  // Calcular meses
+  let meses = 0;
+  if (periodo === 'custom') {
+    meses = parseInt(document.getElementById('mesesCustom').value) || 0;
+  } else if (periodo.endsWith('m')) {
+    meses = parseInt(periodo);
+  } else if (periodo.endsWith('y')) {
+    meses = parseInt(periodo) * 12;
+  }
+  
+  if (meses === 0) {
+    mostrarToast('Período inválido!', 'error');
+    mostrarLoading(false);
+    return;
+  }
+  
+  // Buscar dados do FII ou da carteira
+  let dados;
+  if (fiiSelecionado === 'todos') {
+    // Calcular média da carteira
+    const totalInv = dadosOriginais.reduce((sum, f) => sum + f.totalInvestido, 0);
+    const totalProv = dadosOriginais.reduce((sum, f) => sum + f.totalProventos, 0);
+    const dyMedio = dadosOriginais.reduce((sum, f) => sum + f.dy, 0) / dadosOriginais.length;
+    
+    dados = {
+      ticker: 'CARTEIRA',
+      totalInvestido: totalInv,
+      totalProventos: totalProv,
+      dy: dyMedio
+    };
+  } else {
+    dados = dadosOriginais.find(f => f.ticker === fiiSelecionado);
+  }
+  
+  if (!dados) {
+    mostrarToast('FII não encontrado!', 'error');
+    mostrarLoading(false);
+    return;
+  }
+  
+  // Ajustar DY pelo cenário
+  let dyAnual = dados.dy;
+  if (cenario === 'conservador') {
+    dyAnual = dyAnual * 0.9;
+  } else if (cenario === 'otimista') {
+    dyAnual = dyAnual * 1.1;
+  } else if (cenario === 'custom') {
+    dyAnual = parseFloat(document.getElementById('dyCustom').value) || dyAnual;
+  }
+  
+  // Calcular projeções
+  const proventoMensal = dados.totalProventos;
+  const totalProventos = proventoMensal * meses;
+  const patrimonioFinal = dados.totalInvestido + totalProventos;
+  const rentabilidadeTotal = (totalProventos / dados.totalInvestido) * 100;
+  
+  // Gerar série temporal para gráfico
+  const labels = [];
+  const valores = [];
+  for (let i = 0; i <= meses; i++) {
+    labels.push(i === 0 ? 'Hoje' : `${i}m`);
+    valores.push(dados.totalInvestido + (proventoMensal * i));
+  }
+  
+  // Exibir resultado
+  const resultado = document.getElementById('resultadoProjecao');
+  resultado.style.display = 'block';
+  resultado.innerHTML = `
+    <h3>📊 Projeção para ${dados.ticker} - ${meses} meses</h3>
+    <p><strong>Cenário:</strong> ${cenario.charAt(0).toUpperCase() + cenario.slice(1)} (DY ${dyAnual.toFixed(2)}%/ano)</p>
+    
+    <div class="projecao-grid">
+      <div class="projecao-item">
+        <h4>💰 Investimento Inicial</h4>
+        <div class="valor-projetado">R$ ${dados.totalInvestido.toFixed(2)}</div>
+      </div>
+      
+      <div class="projecao-item">
+        <h4>💵 Total de Proventos</h4>
+        <div class="valor-projetado" style="color: #4caf50;">R$ ${totalProventos.toFixed(2)}</div>
+      </div>
+      
+      <div class="projecao-item">
+        <h4>🏆 Patrimônio Final</h4>
+        <div class="valor-projetado" style="color: #2196f3;">R$ ${patrimonioFinal.toFixed(2)}</div>
+      </div>
+      
+      <div class="projecao-item">
+        <h4>📈 Rentabilidade Total</h4>
+        <div class="valor-projetado" style="color: #9c27b0;">${rentabilidadeTotal.toFixed(2)}%</div>
+      </div>
+      
+      <div class="projecao-item">
+        <h4>📅 Provento Mensal</h4>
+        <div class="valor-projetado">R$ ${proventoMensal.toFixed(2)}</div>
+      </div>
+      
+      <div class="projecao-item">
+        <h4>🎯 Rendimento Anual</h4>
+        <div class="valor-projetado">${dyAnual.toFixed(2)}%</div>
+      </div>
+    </div>
+  `;
+  
+  // Renderizar gráfico
+  document.getElementById('graficoProjecaoCard').style.display = 'block';
+  const ctx = document.getElementById('graficoProjecao');
+  
+  if (graficoProj) graficoProj.destroy();
+  
+  graficoProj = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Patrimônio (R$)',
+        data: valores,
+        borderColor: '#2196f3',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              return 'R$ ' + context.parsed.y.toFixed(2);
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          ticks: {
+            callback: (value) => 'R$ ' + value.toFixed(0)
+          }
+        }
+      }
+    }
+  });
+  
+  mostrarLoading(false);
+  mostrarToast('Projeção calculada com sucesso!', 'success');
+}
+
 // ========== EXPORTAR ==========
 function exportarCSV() {
   let csv = 'Ticker,Preço,DY,P/VP,Qtd Cotas,Provento/Cota,Total Investido,Total Proventos\n';
@@ -1084,10 +1602,6 @@ function baixarArquivo(conteudo, nomeArquivo, tipo) {
 }
 
 // ========== MODAIS ==========
-function abrirModalAdicionar() {
-  document.getElementById('modalAdicionar').style.display = 'block';
-}
-
 function fecharModal(modalId) {
   document.getElementById(modalId).style.display = 'none';
 }
@@ -1097,6 +1611,28 @@ window.onclick = function(event) {
     event.target.style.display = 'none';
   }
 }
+
+// ========== DRAG AND DROP ==========
+const uploadArea = document.getElementById('uploadArea');
+
+uploadArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadArea.classList.add('dragging');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+  uploadArea.classList.remove('dragging');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove('dragging');
+  
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    processarArquivo(files[0]);
+  }
+});
 
 // ========== UTILITÁRIOS ==========
 function mostrarLoading(mostrar) {
